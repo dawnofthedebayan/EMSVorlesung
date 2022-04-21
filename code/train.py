@@ -7,14 +7,14 @@ from torchvision import transforms
 from torchvision.utils import save_image
 from datamodel import CircleDataset
 import os
-from model import autoencoder
-if not os.path.exists('./train_img'):
-    os.mkdir('./train_img')
+from model import autoencoder,autoencoder_2
+if not os.path.exists('./train_img_ae_2'):
+    os.mkdir('./train_img_ae_2')
 
-if not os.path.exists('./val_img'):
-    os.mkdir('./val_img')
-if not os.path.exists('./test_img'):
-    os.mkdir('./test_img')
+if not os.path.exists('./val_img_ae_2'):
+    os.mkdir('./val_img_ae_2')
+if not os.path.exists('./test_img_ae_2'):
+    os.mkdir('./test_img_ae_2')
 
 
 def to_img(x):
@@ -46,7 +46,7 @@ test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True)
 
 
 best_v_loss = 1e6
-model = autoencoder().cuda()
+model = autoencoder_2().cuda()
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate,
                              weight_decay=1e-5)
@@ -72,9 +72,9 @@ for epoch in range(num_epochs):
             .format(epoch+1, num_epochs, total_loss))
     if epoch % 10 == 0:
         pic = to_img(output.cpu().data)
-        save_image(pic, './train_img/pred_image_{}.png'.format(epoch))
+        save_image(pic, './train_img_ae_2/pred_image_{}.png'.format(epoch))
         pic = to_img(img_inp.cpu().data)
-        save_image(pic, './train_img/gt_image_{}.png'.format(epoch))
+        save_image(pic, './train_img_ae_2/gt_image_{}.png'.format(epoch))
 
     # ===================Validation====================
     with torch.no_grad():
@@ -96,21 +96,21 @@ for epoch in range(num_epochs):
 
             
             pic = to_img(img_inp.cpu().data)
-            save_image(pic, './val_img/gt_image_{}.png'.format(epoch))
+            save_image(pic, './val_img_ae_2/gt_image_{}.png'.format(epoch))
 
             pic = to_img(output.cpu().data)
-            save_image(pic, './val_img/pred_image_{}.png'.format(epoch))
+            save_image(pic, './val_img_ae_2/pred_image_{}.png'.format(epoch))
 
             print("Saving model...")
             best_v_loss = avg_vloss
 
             print(model.encoder)
-            #torch.save(model.state_dict(), './conv_autoencoder.pth')
+            torch.save(model.state_dict(), './conv_autoencoder_ae_2.pth')
 
 
 # ===================Testing====================
-model = autoencoder().cuda()
-model.load_state_dict(torch.load('./conv_autoencoder.pth'))
+model = autoencoder_2().cuda()
+model.load_state_dict(torch.load('./conv_autoencoder_ae_2.pth'))
 model.eval()
 
 
@@ -123,10 +123,10 @@ for i, vdata in enumerate(test_loader):
     output = model(img_inp)
 
     pic = to_img(img_inp.cpu().data)
-    save_image(pic, './test_img/gt_image_{}.png'.format(i))
+    save_image(pic, './test_img_ae_2/gt_image_{}.png'.format(i))
 
     pic = to_img(output.cpu().data)
-    save_image(pic, './test_img/pred_image_{}.png'.format(i))
+    save_image(pic, './test_img_ae_2/pred_image_{}.png'.format(i))
     
 
 

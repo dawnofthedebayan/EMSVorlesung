@@ -48,8 +48,20 @@ def predict(choice,inp):
         kernel = cv.getStructuringElement(cv.MORPH_RECT, (3,3))
         pic = cv.morphologyEx(inp, cv.MORPH_CLOSE, kernel)
 
+    elif choice == "Autoencoder(random weights)":
+        
+        inp = img_transform(inp).unsqueeze(0)
+    
+        inp = Variable(inp).cuda()
 
-    elif choice == "Autoencoder":
+        with torch.no_grad():
+
+            output = model(inp)
+            pic = to_img(output.cpu().data)
+
+        pic  = pic.numpy()
+
+    elif choice == "Autoencoder(trained)":
         
         inp = img_transform(inp).unsqueeze(0)
     
@@ -67,6 +79,6 @@ def predict(choice,inp):
 
 
 gr.Interface(fn=predict, 
-             inputs=[gr.inputs.Radio(["Median", "Gaussian", "Opening","Closing","Autoencoder"]), gr.inputs.Image(type="numpy")],
+             inputs=[gr.inputs.Radio(["Median", "Gaussian", "Opening","Closing","Autoencoder(random weights)","Autoencoder(trained)"]), gr.inputs.Image(type="numpy")],
              outputs="image"
              ).launch(share=True)
